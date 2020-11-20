@@ -6,31 +6,18 @@ const date = require("../functions/date");
 
 /* ========================== SingUp implementation  ======================*/
 const singUp = async (req, res) => {
-  /* ========================== Validations  ======================*/
+  
   // check if values are undefined
   if (req.body.firstName === undefined || req.body.lastName === undefined) {
-    return res.status(400).json({
-      success: false,
-      message: "First Name and Last name are required.",
-    });
+    return res.status(400).json({success: false, message: "First Name and Last name are required.", });
   }
 
-  if (
-    req.body.email === undefined ||
-    req.body.password === undefined ||
-    req.body.confirmPassword === undefined
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: "Email Address, Password and Confirm Password  are required.",
-    });
+  if (req.body.email === undefined || req.body.password === undefined || req.body.confirmPassword === undefined) {
+    return res.status(400).json({ success: false, message: "Email Address, Password and Confirm Password  are required.", });
   }
 
-  if (req.body.dateOfBirth === undefined || req.body.gender === undefined) {
-    return res.status(400).json({
-      success: false,
-      message: "Gender and Date Of Birth are required.",
-    });
+  if (req.body.dateOfBirth === undefined || req.body.gender === undefined) { 
+    return res.status(400).json({ success: false, message: "Gender and Date Of Birth are required.", });
   }
   // trim data and assign to variables
   const firstName = req.body.firstName.trim();
@@ -54,57 +41,38 @@ const singUp = async (req, res) => {
   const passwordsMatch = validate.equals(password, confirmPassword);
 
   if (emptyFirstName || emptyLastName) {
-    return res.status(400).json({
-      success: false,
-      message: "First Name and Last name are required.",
-    });
+    return res.status(400).json({success: false, message: "First Name and Last name are required."});
   }
-
   if (emptyEmail || emptyPassword || emptyConfirmPassword) {
-    return res.status(400).json({
-      success: false,
-      message: "Email Address, Password and Confirm Password  are required.",
-    });
+    return res.status(400).json({ success: false, message: "Email Address, Password and Confirm Password  are required."});
   }
   if (!validEmail) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid Email Address.",
-    });
+    return res.status(400).json({ success: false, message: "Invalid Email Address."});
   }
   if (!passwordsMatch) {
-    return res.status(400).json({
-      success: false,
-      message: "Passwords don't match.",
-    });
+    return res.status(400).json({ success: false, message: "Passwords don't match."});
+  }
+  if (emptyDateOdBirth || emptyGender) {
+    return res.status(400).json({ success: false, message: "Gender and Date Of Birth are required."});
   }
 
-  if (emptyDateOdBirth || emptyGender) {
-    return res.status(400).json({
-      success: false,
-      message: "Gender and Date Of Birth are required.",
-    });
-  }
-  // TODO: do all the following
   //hash the password
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
 
+  // define some variables needed for insertion 
   const now = date.nowDate();
   const profileImg = gender + "_img";
   const never = "never modified";
   // check if email address exist in db
   try {
-    const result = await db.query(
-      "SELECT email FROM users WHERE email =" + db.escape(email) + "LIMIT 1"
-    );
+    const sql = "SELECT email FROM users WHERE email = ? LIMIT 1";
+    const result = await db.query(sql, [email]);
     if (result[0].length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Email Address already in used.",
-      });
-    } else if (result[0].length === 0) {
-      // user data to insert
+      return res.status(400).json({ success: false, message: "Email Address already in used."});
+    }
+    // user data to insert if not exist
+    if (result[0].length === 0) {
       const user = {
         first_name: firstName,
         last_name: lastName,
@@ -120,21 +88,15 @@ const singUp = async (req, res) => {
         user_position: "",
         user_status: "",
       };
-      // log result[0] to see info about query result
+      // user insertion
       const result = await db.query("INSERT INTO  users set ?", user);
       if (result[0].affectedRows > 0) {
-        return res.status(201).json({
-          success: true,
-          message: "Account successfully created.",
-        });
+        return res.status(201).json({success: true, message: "Account successfully created."});
       } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal server error occurred.",
-        });
+        return res.status(500).json({success: false,message: "Internal server error occurred."});
       }
     }
-  } catch (error) {
+  } catch (err) {
     return res.status(500).json({
       success: false,
       message: "Internal server error occurred.",
