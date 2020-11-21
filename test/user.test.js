@@ -45,5 +45,5 @@ test("Sign Up", async () =>{
     await request(app).post("/user/signup").send(userOne).expect(201);
 })
 test("Log In", async () =>{
-    await request(app).post("/user/login").send({email: "othman19t@gmail.com", password: "password1"}).expect(401)
+    await request(app).post("/user/login").send({email: "othman19t@gmail.com", password: "password"}).expect(201)
 })
