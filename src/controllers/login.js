@@ -1,10 +1,8 @@
 const validate = require("validator");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
-const config = require("config");
 const db = require("../models/db");
-const date = require("../functions/date");
+const tokenData = require("../functions/tokens");
 /* ========================== login implementation  ======================*/
 const login = async (req, res) => {
   // validated if is data undefined
@@ -58,19 +56,10 @@ const login = async (req, res) => {
           const sql = "UPDATE users SET attempt_times = ? WHERE id = ?"
           await db.query(sql, [0, id]);
         }
-        
         //generate tokens and expiry dates
-        const tokens = {
-          userId: id,
-          accessToken: await jwt.sign({ id },config.get("accessTokenSecret")),
-          refreshToken: await jwt.sign({ id },config.get("refreshTokenSecret")),
-          accessTokenExpiry: parseInt(date.nowMillis()) + 1200000, //1200000  20 mins from now
-          refreshTokenExpiry: parseInt(date.nowMillis()) + 864000000, // 10 days from now
-          createdAt: date.nowDate(),
-          lastModifiedAt: "never modified"
-        }
+        const tokens = await tokenData(id);
         //save tokens in db and send it to client with 201
-        const result = await db.query("INSERT INTO  tokens set ?", tokens);
+        const result = await db.query("INSERT INTO  tokens set ?", [tokens]);
         if (result[0].affectedRows > 0) {
           return res.status(201).json({success: true,message: "User is logged in successfully!", tokens});
         }
