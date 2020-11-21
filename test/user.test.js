@@ -8,7 +8,7 @@ const db = require("../src/models/db")
 const user = {
     first_name: "othma",
     last_name: "othma",
-    email: "othman19@gmail.com ",
+    email: "othman19t@gmail.com ",
     password: "$2b$10$h06669BFNyz1ZAp9NEmNP.cm/m7oUI012FA53WsOeYzJ/u9Zrtx9C", // password is the password
     date_of_birth: "othman",
     gender: "male",
@@ -40,6 +40,10 @@ beforeEach(async()=>{
 afterEach(()=>{
     console.log("afterEach");
 })
-test("Should signup a new user", async () =>{
+
+test("Sign Up", async () =>{
     await request(app).post("/user/signup").send(userOne).expect(201);
+})
+test("Log In", async () =>{
+    await request(app).post("/user/login").send({email: "othman19t@gmail.com", password: "password1"}).expect(401)
 })
