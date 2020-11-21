@@ -47,3 +47,7 @@ test("Sign Up", async () =>{
 test("Log In", async () =>{
     await request(app).post("/user/login").send({email: "othman19t@gmail.com", password: "password"}).expect(201)
 })
+
+test("Me", async () =>{
+    await request(app).get("/user/me").set({"x-access-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcsImlhdCI6MTYwNTkyMTc1OH0.bTDju5-JaA8jyn_I3lO5ktlwrwEua9Aqa4ehdoKZihs", "x-access-token-expiry": "1605922958956"}).send().expect(200)
+})
