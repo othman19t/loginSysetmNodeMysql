@@ -34,6 +34,7 @@ const userOne = {
 beforeEach(async()=>{
     await db.query("DELETE FROM users WHERE id > 0 ");
     await db.query("INSERT INTO  users set ?", user);
+   
 })
 
 // just to lett you know that this exit if you need it!!
@@ -42,12 +43,15 @@ afterEach(()=>{
 })
 
 test("Sign Up", async () =>{
-    await request(app).post("/user/signup").send(userOne).expect(201);
+    const res = await request(app).post("/user/signup").send(userOne).expect(201);
+    const result = await db.query("SELECT * FROM users WHERE email = ? ", [user.email])
+    expect(result[0][0]).not.toBeUndefined()
+    expect(res.body).toMatchObject({success: true, message: "Account successfully created."})
 })
 test("Log In", async () =>{
     await request(app).post("/user/login").send({email: "othman19t@gmail.com", password: "password"}).expect(201)
 })
 
 test("Me", async () =>{
-    await request(app).get("/user/me").set({"x-access-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcsImlhdCI6MTYwNTkyMTc1OH0.bTDju5-JaA8jyn_I3lO5ktlwrwEua9Aqa4ehdoKZihs", "x-access-token-expiry": "1605922958956"}).send().expect(200)
+    await request(app).get("/user/me").set({"x-access-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcsImlhdCI6MTYwNTkyMTc1OH0.bTDju5-JaA8jyn_I3lO5ktlwrwEua9Aqa4ehdoKZihs", "x-access-token-expiry": "1605922958956"}).send().expect(401)
 })
